@@ -416,7 +416,7 @@ public class ListPesananDetailDisajikan extends Fragment {
                     if(status == true){
                         //String msg          = jObj.getString("msg");
                         Toast.makeText(getActivity(), "Berhasil dirubah", Toast.LENGTH_LONG).show();
-                        Intent a = new Intent(getActivity(), ListPesananDetailDisajikan.class);
+                        Intent a = new Intent(getActivity(), DetailPesananFragment.class);
                         a.putExtra("idtransaksi", idTransaksi);
                         startActivity(a);
                         getActivity().finish();
@@ -482,7 +482,7 @@ public class ListPesananDetailDisajikan extends Fragment {
                     if(status == true){
                         String msg          = jObj.getString("msg");
                         Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
-                        Intent a = new Intent(getActivity(), ListPesananDetailDisajikan.class);
+                        Intent a = new Intent(getActivity(), DetailPesananFragment.class);
                         a.putExtra("idtransaksi", idTransaksi);
                         startActivity(a);
                         getActivity().finish();

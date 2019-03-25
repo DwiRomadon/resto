@@ -22,8 +22,9 @@ public class DetailPesananFragment extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewpager_id);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        adapter.AddFragment(new ListPesananDetailDimasak(),"Disiapkan");
         adapter.AddFragment(new ListPesananDetailDisajikan(),"Disajikan");
+        adapter.AddFragment(new ListPesananDetailDimasak(),"Disiapkan");
+
 
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
