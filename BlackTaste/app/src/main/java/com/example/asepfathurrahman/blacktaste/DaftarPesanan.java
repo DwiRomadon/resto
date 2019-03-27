@@ -1,7 +1,10 @@
 package com.example.asepfathurrahman.blacktaste;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,7 +13,11 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -29,6 +36,8 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DaftarPesanan extends AppCompatActivity {
 
@@ -46,6 +55,9 @@ public class DaftarPesanan extends AppCompatActivity {
     AdapterDaftarPesanan adapter;
     ListView list;
 
+    Dialog myDialog;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +65,7 @@ public class DaftarPesanan extends AppCompatActivity {
 
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
-
+        myDialog = new Dialog(this);
 
         mTopToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mTopToolbar);
@@ -83,6 +95,7 @@ public class DaftarPesanan extends AppCompatActivity {
         list.setAdapter(adapter);
 
         dataPesanan();
+        longClick();
 
     }
 
@@ -146,11 +159,6 @@ public class DaftarPesanan extends AppCompatActivity {
                             if(statusTransaksi.equals("wait")){
                                 dataNya.add(new com.example.asepfathurrahman.blacktaste.data.DaftarPesanan(idTransaksi, idKaryawan, idMMeja, kursIndonesia.format(totalBayar), statusTransaksi, namaKaryawan));
                             }
-                            //else {
-                            //    Intent a = new Intent(DaftarPesanan.this, MainActivity.class);
-                            //    startActivity(a);
-                            //    finish();
-                            //}
                         }
                     }else {
                         Intent a = new Intent(DaftarPesanan.this, MainActivity.class);
@@ -178,6 +186,47 @@ public class DaftarPesanan extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
+    void longClick(){
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                myDialog.setContentView(R.layout.popup_update_no_meja);
+                TextView txtclose;
+                final EditText edtNoMeja;
+                txtclose =(TextView) myDialog.findViewById(R.id.txtclose);
+                edtNoMeja=(EditText) myDialog.findViewById(R.id.edtNomeje);
+
+                //Toast.makeText(getApplicationContext(), dataNya.get(position).getIdTransaksi(), Toast.LENGTH_LONG).show();
+
+                edtNoMeja.setText(dataNya.get(position).getIdMeja());
+                txtclose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        myDialog.dismiss();
+                    }
+                });
+
+                Button btnEdit;
+
+                btnEdit = (Button) myDialog.findViewById(R.id.btnEdit);
+
+                btnEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        String nomeja = edtNoMeja.getText().toString();
+
+                        updateNoMeja(dataNya.get(position).getIdTransaksi(), nomeja);
+                    }
+                });
+
+                myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                myDialog.show();
+                return true;
+            }
+        });
+    }
+
     private void showDialog() {
         if (!pDialog.isShowing())
             pDialog.show();
@@ -186,5 +235,65 @@ public class DaftarPesanan extends AppCompatActivity {
     private void hideDialog() {
         if (pDialog.isShowing())
             pDialog.dismiss();
+    }
+
+    public void updateNoMeja(final String idTransaksi, final String idMeja){
+
+        String tag_string_req = "req_login";
+
+        pDialog.setMessage("Mohon Tunggu");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                Config_URL.updateNoMeja, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("Data", "Login Response: " + response.toString());
+                //loginBtn.revertAnimation();
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean status = jObj.getBoolean("status");
+
+                    if(status == true){
+                        String msg          = jObj.getString("msg");
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                        Intent a = new Intent(getApplicationContext(), DaftarPesanan.class);
+                        startActivity(a);
+                        finish();
+                    }else {
+                        String error_msg = jObj.getString("msg");
+                        Toast.makeText(getApplicationContext(), error_msg, Toast.LENGTH_LONG).show();
+
+                    }
+
+                }catch (JSONException e){
+                    //JSON error
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener(){
+
+            @Override
+            public void onErrorResponse(VolleyError error){
+                //Log.e(String.valueOf("Data", "Login Error : " + error.getMessage());
+                error.printStackTrace();
+                //loginBtn.revertAnimation();
+                hideDialog();
+            }
+        }){
+
+            @Override
+            protected Map<String, String> getParams(){
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("idMeja", idMeja);
+                params.put("idtrasaksi", idTransaksi);
+                return params;
+            }
+        };
+
+        strReq.setRetryPolicy(policy);
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 }

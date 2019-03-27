@@ -23,5 +23,6 @@ public class Config_URL
     public static String getTotalBayar      = base_URL + "/API/selectDataTransaksi";
     public static String pesananDisajikan   = base_URL + "/API/updateStatus";
     public static String cekNoMeja          = base_URL + "/API/cekDataMeja";
+    public static String updateNoMeja       = base_URL + "/API/updateNoMeja";
 
 }

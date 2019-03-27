@@ -629,4 +629,18 @@ class API extends CI_Controller {
         endif;
         echo json_encode($data);
     }
+
+    public function updateNoMeja(){
+        $idMeja 	= $this -> input -> post('idMeja');
+        $idTrasnsaksi = $this -> input -> post('idtrasaksi');
+        $query      = $this -> Query -> updateData(array('id_transaksi'=>$idTrasnsaksi),array('id_meja'=>$idMeja),'transaksi');
+        if($query):
+            $data['status']         = true;
+            $data['msg']	        = 'Berhasil';
+        else:
+            $data['status']     = false;
+            $data['msg']	    = 'Gagal';
+        endif;
+        echo json_encode($data);
+    }
 }
